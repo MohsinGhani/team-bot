@@ -1,0 +1,23 @@
+name: Daily team summary
+
+on:
+  schedule:
+    # Mon–Fri at 16:00 and 17:00 UTC. The script only posts on the run that is 5pm UK time.
+    - cron: "0 16,17 * * 1-5"
+  workflow_dispatch: # "Run workflow" button for testing (posts straight away)
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Post summary to Discord
+        run: node scripts/daily-summary.mjs
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_SUMMARY_WEBHOOK }}
+          LINEAR_TEAM_KEY: INC
+          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
